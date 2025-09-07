@@ -1,16 +1,141 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Parth . ChatBot</title>
-    <style>
-    
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parth . ChatBot</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #121212; /* Dark background */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .chat-container {
+      width: 100%;
+      max-width: 800px;
+      height: 80vh;
+      background: #1e1e1e; /* Dark container */
+      border-radius: 20px;
+      box-shadow: 0px 8px 20px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .chat-header {
+      background: #333; /* Dark header */
+      color: white;
+      text-align: center;
+      padding: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    .chat-box {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .message {
+      max-width: 75%;
+      margin: 5px 0;
+      padding: 10px 15px;
+      border-radius: 15px;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+    .user {
+      align-self: flex-end;
+      background: #2575fc; /* Bright blue for user messages */
+      color: white;
+    }
+    .bot {
+      align-self: flex-start;
+      background: #2a2a2a; /* Dark gray for bot */
+      color: #ddd;
+    }
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #444;
+      background: #1e1e1e;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      outline: none;
+      background: #2a2a2a;
+      color: white;
+    }
+    .chat-input input::placeholder {
+      color: #aaa;
+    }
+    .chat-input button {
+      padding: 10px 20px;
+      border: none;
+      background: #2575fc;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .chat-input button:hover {
+      background: #1a5bcc;
+    }
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(10px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+  </style>
 </head>
 <body>
-    <div class="chat-contaner">
-        <div class="chat-hader">💬 </div>
+  <div class="chat-container">
+    <div class="chat-header">💬 Parth</div>
+    <div class="chat-box" id="chat-box"></div>
+    <div class="chat-input">
+      <input type="text" id="user-input" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
     </div>
+  </div>
+
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById("user-input");
+      const message = input.value.trim();
+      if (!message) return;
+
+      addMessage(message, "user");
+      input.value = "";
+
+      // typing animation
+      const typing = document.createElement("div");
+      typing.className = "message bot";
+      typing.textContent = "Typing...";
+      const chatBox = document.getElementById("chat-box");
+      chatBox.appendChild(typing);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      const response = await fetch("/chatbot/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message })
+      });
+      const data = await response.json();
+
+      chatBox.removeChild(typing); // remove "Typing..."
+      addMessage(data.reply, "bot");
+    }
+
+    function addMessage(text, sender) {
+      const chatBox = document.getElementById("chat-box");
+      const msg = document.createElement("div");
+      msg.className = "message" + sender;
+      msg.textContent = text;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight; // auto scroll
+    }
+  </script>
 </body>
 </html>
